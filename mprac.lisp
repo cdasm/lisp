@@ -1,0 +1,43 @@
+(defun mk-db (db)
+  (list
+   (lambda (x)
+     (cdr (assoc x db)))
+   (lambda (x y)
+     (push (cons x y) db))
+   (lambda (x)
+     (setf db (delete x db :key #'car)))))
+
+(defun count-obj-in-each (obj lst)
+	   (labels ((cnt-single (x y)
+			       (if (consp y)
+				   (+ (if (eql x (car y))
+					  1
+					  0)
+				      (cnt-single x (cdr y)))
+				   0)))
+	   (mapcar (lambda (x) (cnt-single obj x)) lst)))
+
+(defun group (lst n)
+	   (if (> n 0)
+	       (if (consp lst)
+		   (let ((rst (nthcdr n lst)))
+		     (if (consp rst)
+			 (cons (subseq lst 0 n) (group rst n))
+			 (list lst))))))
+
+(defmacro my-let (varlst &body body)
+	   `((lambda ,(mapcar #'car varlst)
+	       ,@body)
+	     ,@(mapcar #'cadr varlst)))
+(defmacro with-gensyms (syms &body body)
+	   `(let ,(mapcar (lambda (s) `(,s (gensym))) syms) ,@body))
+
+(defun com-help (lst args)
+	   (if (= 1 (length lst))
+	       `(,(car lst) ,args)
+	       `(,(car lst) ,(com-help (cdr lst) args))))
+
+(defmacro compose (&rest lst)
+	   (with-gensyms (pa)
+	     `(lambda (,pa)
+		,(com-help lst pa))))
