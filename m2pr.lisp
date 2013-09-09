@@ -5,10 +5,10 @@
 
 (defun compose-help (lst x)
 	   (if (= 1 (length lst))
-	       `(,(car lst) ,x)
+	       `(apply #',(car lst) ,x)
 	       `(,(car lst) ,(compose-help (cdr lst) x))))
 
 (defmacro compose (&rest lst)
 	   (let ((arg (gensym)))
-	     `(lambda (,arg)
+	     `(lambda (&rest ,arg)
 		,(compose-help lst arg))))
