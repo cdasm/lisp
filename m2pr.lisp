@@ -12,3 +12,23 @@
 	   (let ((arg (gensym)))
 	     `(lambda (&rest ,arg)
 		,(compose-help lst arg))))
+
+(set-macro-character #\} (get-macro-character #\) ))
+
+(set-dispatch-macro-character #\# #\{
+				       (lambda (stream ch1 ch2)
+					 (declare (ignore ch1 ch2))
+					 (let ((lst (read-delimited-list #\} stream t)))
+					   `(compose ,@lst))))
+
+(let ((rpar (get-macro-character #\))))
+	   (defun ddfn (left right fn)
+	     (set-macro-character right rpar)
+	     (set-dispatch-macro-character #\# left
+		 (lambda (stream ch1 ch2)
+		   (declare (ignore ch1 ch2))
+		   (apply fn
+			  (read-delimited-list right stream t))))))
+
+(defmacro defdelim (left right parms &body body)
+	   `(ddfn ,left ,right #'(lambda ,parms ,@body)))
