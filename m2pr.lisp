@@ -32,3 +32,14 @@
 
 (defmacro defdelim (left right parms &body body)
 	   `(ddfn ,left ,right #'(lambda ,parms ,@body)))
+
+
+(defun fltn (lst)
+	   (labels ((rec (x acc)
+		      (if (null x)
+			  acc
+		      (let ((y (car x)))
+			(if (atom y)
+			    (rec (cdr x) (append acc (list y) ) )
+			    (rec (cdr x) (rec y acc)))))))
+	     (rec lst nil)))
